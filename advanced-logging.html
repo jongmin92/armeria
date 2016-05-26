@@ -1,0 +1,387 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Logging contextual information &mdash; Armeria 0.84.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Structured logging" href="advanced-structured-logging.html" />
+    <link rel="prev" title="Advanced topics" href="advanced.html" />
+  <script src="_static/center_page.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/default.min.css">
+   
+
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/armeria.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.84
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setting up a project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Writing a server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Writing a client</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="advanced.html">Advanced topics</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Logging contextual information</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#built-in-properties">Built-in properties</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#http-request-and-response-headers">HTTP request and response headers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-attributes">Custom attributes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#using-an-alternative-string-converter-for-a-custom-attribute">Using an alternative string converter for a custom attribute</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-structured-logging.html">Structured logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-custom-attributes.html"><tt class="docutils literal">RequestContext</tt> custom attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-structured-logging-kafka.html">Structured logging with Kafka</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-unit-testing.html">Unit-testing <tt class="docutils literal">Client</tt> and <tt class="docutils literal">Service</tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-production-checklist.html">Production checklist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-zipkin.html">Zipkin integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-zookeeper.html">Service discovery with ZooKeeper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-saml.html">SAML Single Sign-On</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-spring-webflux-integration.html">Using Armeria with Spring WebFlux</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/line/armeria/releases">Release notes</a></li>
+<li class="toctree-l1"><a class="reference external" href="apidocs/index.html#://">API documentation</a></li>
+<li class="toctree-l1"><a class="reference external" href="xref/index.html#://">Source cross-reference</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/line/armeria/issues?q=label%3Aquestion">Questions and answers</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/line/armeria">Fork me at GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/line/armeria/blob/master/CONTRIBUTING.md">Contributing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Armeria</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="advanced.html">Advanced topics</a> &raquo;</li>
+        
+      <li>Logging contextual information</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/line/armeria/blob/master/site/src/sphinx/advanced-logging.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="logging-contextual-information">
+<span id="advanced-logging"></span><h1>Logging contextual information<a class="headerlink" href="#logging-contextual-information" title="Permalink to this headline">¶</a></h1>
+<p>With Armeria’s <a class="reference external" href="https://logback.qos.ch/">Logback</a> integration, you can log the properties of the <code class="code api-reference docutils literal javadoc"><a class="code api-reference reference external javadoc" href="apidocs/com/linecorp/armeria/common/RequestContext.html">RequestContext</a></code> of the
+request being handled. <code class="code api-reference docutils literal javadoc"><a class="code api-reference reference external javadoc" href="apidocs/com/linecorp/armeria/common/logback/RequestContextExportingAppender.html">RequestContextExportingAppender</a></code> is a Logback appender that exports the properties
+of the current <tt class="docutils literal">RequestContext</tt> to <a class="reference external" href="https://logback.qos.ch/manual/mdc.html">MDC</a> (mapped diagnostic context).</p>
+<p>For example, the following configuration:</p>
+<div class="highlight-xml notranslate"><div class="highlight hljs"><pre class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;configuration&gt;
+  &lt;appender name=&quot;CONSOLE&quot; class=&quot;ch.qos.logback.core.ConsoleAppender&quot;&gt;
+    &lt;encoder&gt;
+      &lt;pattern&gt;%d{HH:mm:ss.SSS} %X{remote.ip} %X{tls.cipher}
+               %X{req.http_headers.user-agent} %X{attrs.some_value} %msg%n&lt;/pattern&gt;
+    &lt;/encoder&gt;
+  &lt;/appender&gt;
+
+  &lt;appender name=&quot;RCEA&quot; class=&quot;com.linecorp.armeria.common.logback.RequestContextExportingAppender&quot;&gt;
+    &lt;appender-ref ref=&quot;CONSOLE&quot; /&gt;
+    &lt;export&gt;remote.ip&lt;/export&gt;
+    &lt;export&gt;tls.cipher&lt;/export&gt;
+    &lt;export&gt;req.http_headers.user-agent&lt;/export&gt;
+    &lt;export&gt;attrs.some_value:com.example.AttrKeys#SOME_VALUE&lt;/export&gt;
+    &lt;!-- ... or alternatively:
+    &lt;exports&gt;remote.ip, remote.port, tls.cipher,
+             req.http_headers.user-agent,
+             attrs.some_value:com.example.AttrKeys#SOME_VALUE&lt;/exports&gt;
+    --&gt;
+  &lt;/appender&gt;
+  ...
+&lt;/configuration&gt;</pre></div>
+</div>
+<p>will define an appender called <tt class="docutils literal">RCEA</tt> which exports the following:</p>
+<ul class="simple">
+<li><tt class="docutils literal">remote.ip</tt><ul>
+<li>the IP address of the remote peer,</li>
+</ul>
+</li>
+<li><tt class="docutils literal">tls.cipher</tt><ul>
+<li>the SSL/TLS cipher suite of the connection,</li>
+</ul>
+</li>
+<li><tt class="docutils literal">req.http_headers.user-agent</tt><ul>
+<li>the user agent of the client,</li>
+</ul>
+</li>
+<li><tt class="docutils literal">attrs.some_value</tt><ul>
+<li>a custom attribute set via <tt class="docutils literal">RequestContext.attr(AttributeKey.valueOf(AttrKeys.class, "SOME_VALUE")).set(...)</tt></li>
+</ul>
+</li>
+</ul>
+<p>… to the <a class="reference external" href="https://logback.qos.ch/manual/mdc.html">MDC</a> property map and forwards the log message to the appender <tt class="docutils literal">CONSOLE</tt>, as defined in the
+<tt class="docutils literal"><appender-ref /></tt> element.</p>
+<p>There are three types of properties you can export using <code class="code api-reference docutils literal javadoc"><a class="code api-reference reference external javadoc" href="apidocs/com/linecorp/armeria/common/logback/RequestContextExportingAppender.html">RequestContextExportingAppender</a></code>.</p>
+<div class="section" id="built-in-properties">
+<h2>Built-in properties<a class="headerlink" href="#built-in-properties" title="Permalink to this headline">¶</a></h2>
+<p>A built-in property is a common property available for most requests. See the complete list of the built-in
+properties and their MDC keys at <code class="code api-reference docutils literal javadoc"><a class="code api-reference reference external javadoc" href="apidocs/com/linecorp/armeria/common/logback/BuiltInProperty.html">BuiltInProperty</a></code>.</p>
+</div>
+<div class="section" id="http-request-and-response-headers">
+<h2>HTTP request and response headers<a class="headerlink" href="#http-request-and-response-headers" title="Permalink to this headline">¶</a></h2>
+<p>When the session protocol of the current connection is HTTP, a user can export HTTP headers of the current
+request and response. The MDC key of the exported header is <tt class="docutils literal">"req.http_headers.<lower-case header name>"</tt> or
+<tt class="docutils literal">"res.http_headers.<lower-case header name>"</tt>. For example:</p>
+<ul class="simple">
+<li><tt class="docutils literal">"req.http_headers.user-agent"</tt></li>
+<li><tt class="docutils literal">"res.http_headers.set-cookie"</tt></li>
+</ul>
+</div>
+<div class="section" id="custom-attributes">
+<h2>Custom attributes<a class="headerlink" href="#custom-attributes" title="Permalink to this headline">¶</a></h2>
+<p>A user can attach an arbitrary custom attribute to a <code class="code api-reference docutils literal javadoc"><a class="code api-reference reference external javadoc" href="apidocs/com/linecorp/armeria/common/RequestContext.html">RequestContext</a></code> by using
+<a class="reference internal" href="advanced-custom-attributes.html#advanced-custom-attribute"><span class="std std-ref">RequestContext custom attributes</span></a> to store the information associated with the request being handled.
+<code class="code api-reference docutils literal javadoc"><a class="code api-reference reference external javadoc" href="apidocs/com/linecorp/armeria/common/logback/RequestContextExportingAppender.html">RequestContextExportingAppender</a></code> can export such attributes to the <a class="reference external" href="https://logback.qos.ch/manual/mdc.html">MDC</a> property map as well.</p>
+<p>Unlike other property types, you need to specify the full name of an attribute as well as its alias.
+For example, if you want to export an attribute <tt class="docutils literal">com.example.Foo#ATTR_BAR</tt> with the alias <tt class="docutils literal">bar</tt>, you need to add
+<tt class="docutils literal"><export>attrs.bar:com.example.Foo#ATTR_BAR</export></tt> to the XML configuration. The resulting MDC key to
+access the attribute value is <tt class="docutils literal">attrs.bar</tt>, which follows the form of <tt class="docutils literal">attrs.<alias></tt>.</p>
+<div class="section" id="using-an-alternative-string-converter-for-a-custom-attribute">
+<h3>Using an alternative string converter for a custom attribute<a class="headerlink" href="#using-an-alternative-string-converter-for-a-custom-attribute" title="Permalink to this headline">¶</a></h3>
+<p>By default, <code class="code api-reference docutils literal javadoc"><a class="code api-reference reference external javadoc" href="apidocs/com/linecorp/armeria/common/logback/RequestContextExportingAppender.html">RequestContextExportingAppender</a></code> uses <tt class="docutils literal">Object.toString()</tt> to convert an attribute value
+into an <a class="reference external" href="https://logback.qos.ch/manual/mdc.html">MDC</a> value. If you want an alternative string representation of an attribute value, you can define
+a <tt class="docutils literal">Function</tt> class with a public no-args constructor that transforms an attribute value into a <tt class="docutils literal">String</tt>:</p>
+<div class="highlight-java notranslate"><div class="highlight hljs"><pre class="java">package com.example;
+
+public class SomeValue {
+    public final String value;
+
+    @Override
+    public String toString() {
+        // Too verbose for logging
+        return &quot;SomeValue(value=&quot; + value + &#x27;)&#x27;;
+    }
+}
+
+public class MyStringifier implements Function&lt;SomeValue, String&gt; {
+    @Override
+    public String apply(SomeValue o) {
+        return o.value;
+    }
+}</pre></div>
+</div>
+<p>Once the <tt class="docutils literal">Function</tt> is implemented, specify the fully-qualified class name of the <tt class="docutils literal">Function</tt> implementation
+as the 3rd component of the <tt class="docutils literal"><export /></tt> element in the XML configuration:</p>
+<div class="highlight-xml notranslate"><div class="highlight hljs"><pre class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;configuration&gt;
+  ...
+  &lt;appender name=&quot;RCEA&quot; class=&quot;com.linecorp.armeria.common.logback.RequestContextExportingAppender&quot;&gt;
+    ...
+    &lt;export&gt;attrs.some_value:com.example.AttrKeys#SOME_VALUE:com.example.MyStringifier&lt;/export&gt;
+    ...
+  &lt;/appender&gt;
+  ...
+&lt;/configuration&gt;</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="advanced-structured-logging.html" class="btn btn-neutral float-right" title="Structured logging" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="advanced.html" class="btn btn-neutral" title="Advanced topics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015-2019, LINE Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+  <div class="github-fork-ribbon-wrapper right">
+    <div class="github-fork-ribbon">
+      <a href="https://github.com/line/armeria">Fork me at GitHub</a>
+    </div>
+  </div>
+  <script type="text/javascript" src="_static/add_badges.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/gradle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/protobuf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/thrift.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/yaml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.6.0/highlightjs-line-numbers.min.js"></script>
+  <script>
+    document.querySelectorAll('div.hljs > pre').forEach(function(block) {
+      hljs.highlightBlock(block);
+      hljs.lineNumbersBlock(block);
+    });
+  </script>
+   
+
+
+</body>
+</html>

@@ -1,0 +1,756 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Writing an access log &mdash; Armeria 0.84.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Configuring CORS" href="server-cors.html" />
+    <link rel="prev" title="Embedding a servlet container" href="server-servlet.html" />
+  <script src="_static/center_page.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/default.min.css">
+   
+
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/armeria.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.84
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setting up a project</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="server.html">Writing a server</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="server-basics.html">Server basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="server-decorator.html">Decorating a service</a></li>
+<li class="toctree-l2"><a class="reference internal" href="server-grpc.html">Running a gRPC service</a></li>
+<li class="toctree-l2"><a class="reference internal" href="server-thrift.html">Running a Thrift service</a></li>
+<li class="toctree-l2"><a class="reference internal" href="server-docservice.html">Browsing and invoking services with <tt class="docutils literal">DocService</tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="server-annotated-service.html">Annotated services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="server-http-file.html">Serving static files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="server-servlet.html">Embedding a servlet container</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Writing an access log</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#configuring-logging-framework">Configuring logging framework</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#logback">logback</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#log4j2">log4j2</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#customizing-a-log-format">Customizing a log format</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#retrieving-values-from-requestlog">Retrieving values from RequestLog</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#customizing-timestamp-format">Customizing timestamp format</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#customizing-an-access-log-writer">Customizing an access log writer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#customizing-an-access-logger">Customizing an access logger</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="server-cors.html">Configuring CORS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="server-sse.html">Serving Server-Sent Events</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Writing a client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced topics</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/line/armeria/releases">Release notes</a></li>
+<li class="toctree-l1"><a class="reference external" href="apidocs/index.html#://">API documentation</a></li>
+<li class="toctree-l1"><a class="reference external" href="xref/index.html#://">Source cross-reference</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/line/armeria/issues?q=label%3Aquestion">Questions and answers</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/line/armeria">Fork me at GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/line/armeria/blob/master/CONTRIBUTING.md">Contributing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Armeria</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="server.html">Writing a server</a> &raquo;</li>
+        
+      <li>Writing an access log</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/line/armeria/blob/master/site/src/sphinx/server-access-log.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="writing-an-access-log">
+<span id="server-access-log"></span><h1>Writing an access log<a class="headerlink" href="#writing-an-access-log" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="configuring-logging-framework">
+<h2>Configuring logging framework<a class="headerlink" href="#configuring-logging-framework" title="Permalink to this headline">¶</a></h2>
+<p>To write an access log, you need to configure a logging framework first. The following configurations are
+simple examples of <tt class="docutils literal">logback.xml</tt> and <tt class="docutils literal">log4j2.xml</tt> respectively.</p>
+<div class="section" id="logback">
+<h3>logback<a class="headerlink" href="#logback" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-xml notranslate"><div class="highlight hljs"><pre class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;configuration&gt;
+  &lt;appender name=&quot;CONSOLE&quot; class=&quot;ch.qos.logback.core.ConsoleAppender&quot;&gt;
+    &lt;encoder&gt;
+      &lt;pattern&gt;%-4relative [%thread] %-5level %logger{35} - %msg%n&lt;/pattern&gt;
+    &lt;/encoder&gt;
+  &lt;/appender&gt;
+
+  &lt;appender name=&quot;ACCESS&quot; class=&quot;ch.qos.logback.core.rolling.RollingFileAppender&quot;&gt;
+    &lt;file&gt;access.log&lt;/file&gt;
+    &lt;rollingPolicy class=&quot;ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy&quot;&gt;
+      &lt;!-- daily rollover --&gt;
+      &lt;fileNamePattern&gt;access.%d{yyyy-MM-dd}-%i.log&lt;/fileNamePattern&gt;
+      &lt;!-- each file should be at most 1GB, keep 30 days worth of history, but at most 30GB --&gt;
+      &lt;maxFileSize&gt;1GB&lt;/maxFileSize&gt;
+      &lt;maxHistory&gt;30&lt;/maxHistory&gt;
+      &lt;totalSizeCap&gt;30GB&lt;/totalSizeCap&gt;
+    &lt;/rollingPolicy&gt;
+    &lt;encoder&gt;
+      &lt;pattern&gt;%msg%n&lt;/pattern&gt;
+    &lt;/encoder&gt;
+  &lt;/appender&gt;
+
+  &lt;logger name=&quot;com.linecorp.armeria.logging.access&quot; level=&quot;INFO&quot; additivity=&quot;false&quot;&gt;
+    &lt;appender-ref ref=&quot;ACCESS&quot;/&gt;
+  &lt;/logger&gt;
+
+  &lt;root level=&quot;DEBUG&quot;&gt;
+    &lt;appender-ref ref=&quot;CONSOLE&quot;/&gt;
+  &lt;/root&gt;
+&lt;/configuration&gt;</pre></div>
+</div>
+</div>
+<div class="section" id="log4j2">
+<h3>log4j2<a class="headerlink" href="#log4j2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-xml notranslate"><div class="highlight hljs"><pre class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;Configuration status=&quot;WARN&quot;&gt;
+  &lt;Appenders&gt;
+    &lt;Console name=&quot;CONSOLE&quot; target=&quot;SYSTEM_OUT&quot;&gt;
+      &lt;PatternLayout pattern=&quot;%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n&quot;/&gt;
+    &lt;/Console&gt;
+    &lt;RollingFile name=&quot;ACCESS&quot; fileName=&quot;access.log&quot;
+                 filePattern=&quot;access.%d{MM-dd-yyyy}-%i.log.gz&quot;&gt;
+      &lt;PatternLayout&gt;
+        &lt;Pattern&gt;%m%n&lt;/Pattern&gt;
+      &lt;/PatternLayout&gt;
+
+      &lt;Policies&gt;
+        &lt;!-- daily rollover --&gt;
+        &lt;TimeBasedTriggeringPolicy/&gt;
+        &lt;!-- each file should be at most 1GB --&gt;
+        &lt;SizeBasedTriggeringPolicy size=&quot;1GB&quot;/&gt;
+      &lt;/Policies&gt;
+      &lt;!-- keep 30 archives --&gt;
+      &lt;DefaultRolloverStrategy max=&quot;30&quot;/&gt;
+    &lt;/RollingFile&gt;
+  &lt;/Appenders&gt;
+
+  &lt;Loggers&gt;
+    &lt;Logger name=&quot;com.linecorp.armeria.logging.access&quot; level=&quot;INFO&quot; additivity=&quot;false&quot;&gt;
+      &lt;AppenderRef ref=&quot;ACCESS&quot;/&gt;
+    &lt;/Logger&gt;
+    &lt;Root level=&quot;DEBUG&quot;&gt;
+      &lt;AppenderRef ref=&quot;CONSOLE&quot;/&gt;
+    &lt;/Root&gt;
+  &lt;/Loggers&gt;
+&lt;/Configuration&gt;</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="customizing-a-log-format">
+<h2>Customizing a log format<a class="headerlink" href="#customizing-a-log-format" title="Permalink to this headline">¶</a></h2>
+<p>Access logging is disabled by default. If you want to enable it, you need to specify an access log writer
+using <code class="code api-reference docutils literal javadoc"><a class="code api-reference reference external javadoc" href="apidocs/com/linecorp/armeria/server/ServerBuilder.html">ServerBuilder</a></code>. You may use one of the pre-defined log formats.</p>
+<div class="highlight-java notranslate"><div class="highlight hljs"><pre class="java">ServerBuilder sb = new ServerBuilder();
+// Use NCSA common log format.
+sb.accessLogWriter(AccessLogWriter.common(), true);
+// Use NCSA combined log format.
+sb.accessLogWriter(AccessLogWriter.combined(), true);
+// Use your own log format.
+sb.accessLogFormat(&quot;...log format...&quot;);
+...</pre></div>
+</div>
+<p>Pre-defined log formats are as follows.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="15%" />
+<col width="85%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Name</th>
+<th class="head">Format</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><tt class="docutils literal">common</tt></td>
+<td><tt class="docutils literal">%h %l %u %t "%r" %s %b</tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">combined</tt></td>
+<td><tt class="docutils literal">%h %l %u %t "%r" %s %b "%{Referer}i" "%{User-Agent}i" "%{Cookie}i"</tt></td>
+</tr>
+</tbody>
+</table>
+<p>Tokens for the log format are listed in the following table.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="28%" />
+<col width="19%" />
+<col width="53%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Tokens</th>
+<th class="head">Condition support</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><tt class="docutils literal">%A</tt></td>
+<td>No</td>
+<td>the local IP address</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">%a</tt></td>
+<td>No</td>
+<td>the IP address of the client who initiated a
+request. Use <tt class="docutils literal">%{c}a</tt> format string to get the
+remote IP address where the channel is connected
+to, which may yield a different value when there
+is an intermediary proxy server.
+This value relies on the <tt class="docutils literal">clientAddress()</tt> and
+<tt class="docutils literal">remoteAddress()</tt> methods of
+<code class="code api-reference docutils literal javadoc"><a class="code api-reference reference external javadoc" href="apidocs/com/linecorp/armeria/server/ServiceRequestContext.html">ServiceRequestContext</a></code>, please refer to
+<a class="reference internal" href="server-basics.html#client-address"><span class="std std-ref">Getting an IP address of a client who initiated a request</span></a> about how to configure the
+<code class="code api-reference docutils literal javadoc"><a class="code api-reference reference external javadoc" href="apidocs/com/linecorp/armeria/server/ServerBuilder.html">ServerBuilder</a></code> to get the client address you
+interest.</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">%h</tt></td>
+<td>No</td>
+<td>the remote hostname or IP address if DNS
+hostname lookup is not available</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">%l</tt></td>
+<td>No</td>
+<td>the remote logname of the user
+(not supported yet, always write <tt class="docutils literal">-</tt>)</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">%u</tt></td>
+<td>No</td>
+<td>the name of the authenticated remote user
+(not supported yet, always write <tt class="docutils literal">-</tt>)</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">%t</tt></td>
+<td>No</td>
+<td>the date, time and time zone that the request
+was received, by default in <tt class="docutils literal">strftime</tt> format
+%d/%b/%Y:%H:%M:%S %z.
+(for example, <tt class="docutils literal">10/Oct/2000:13:55:36 -0700</tt>)
+Refer to <a class="reference internal" href="#timestamp-format"><span class="std std-ref">Customizing timestamp format</span></a> for more
+information.</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">%r</tt></td>
+<td>Yes</td>
+<td>the request line from the client
+(for example, <tt class="docutils literal">GET /path h2</tt>)</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">%s</tt></td>
+<td>No</td>
+<td>the HTTP status code returned to the client</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">%b</tt></td>
+<td>Yes</td>
+<td>the size of the object returned to the client,
+measured in bytes</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">%{HEADER_NAME}i</tt></td>
+<td>Yes</td>
+<td>the value of the specified HTTP request header
+name</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">%{HEADER_NAME}o</tt></td>
+<td>Yes</td>
+<td>the value of the specified HTTP response header
+name</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">%{ATTRIBUTE_NAME}j</tt></td>
+<td>Yes</td>
+<td>the value of the specified attribute name</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">%{REQUEST_LOG_NAME}L</tt></td>
+<td>Yes</td>
+<td>the value of the specified variable of the
+<code class="code api-reference docutils literal javadoc"><a class="code api-reference reference external javadoc" href="apidocs/com/linecorp/armeria/common/logging/RequestLog.html">RequestLog</a></code>. Refer to <a class="reference internal" href="#request-log"><span class="std std-ref">Retrieving values from RequestLog</span></a>
+for more information.</td>
+</tr>
+</tbody>
+</table>
+<p>Some tokens can have a condition of the response status code and the log message can be omitted with
+the condition.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="52%" />
+<col width="48%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Example of a condition</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><tt class="docutils literal">%200b</tt></td>
+<td>Write the size of the object returned to the
+client only if the response code is <tt class="docutils literal">200</tt>.</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">%200,304{User-Agent}i</tt></td>
+<td>Write <tt class="docutils literal">User-Agent</tt> header value only if the
+response code is <tt class="docutils literal">200</tt> or <tt class="docutils literal">304</tt>.</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">%!200,304{com.example.armeria.Attribute#KEY}j</tt></td>
+<td>Write the value of the specified attribute
+only if the response code is neither <tt class="docutils literal">200</tt>
+nor <tt class="docutils literal">304</tt>.</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="retrieving-values-from-requestlog">
+<span id="request-log"></span><h3>Retrieving values from RequestLog<a class="headerlink" href="#retrieving-values-from-requestlog" title="Permalink to this headline">¶</a></h3>
+<p><code class="code api-reference docutils literal javadoc"><a class="code api-reference reference external javadoc" href="apidocs/com/linecorp/armeria/common/logging/RequestLog.html">RequestLog</a></code> holds information about the request, so a user may want to write these values to his or
+her access log file. To write them in a simple way, <tt class="docutils literal">%{variable}L</tt> token is provided with the following
+supported variable:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="31%" />
+<col width="69%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Name</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><tt class="docutils literal">method</tt></td>
+<td>the HTTP method value of the request</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">path</tt></td>
+<td>the absolute path part of the HTTP request URI</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">query</tt></td>
+<td>the query part of the HTTP request URI</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">requestStartTimeMillis</tt></td>
+<td>the time when the processing of the request started,
+in milliseconds since the epoch</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">requestDurationMillis</tt></td>
+<td>the duration that was taken to consume or produce the request
+completely, in milliseconds</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">requestDurationNanos</tt></td>
+<td>the duration that was taken to consume or produce the request
+completely, in nanoseconds</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">requestLength</tt></td>
+<td>the length of the request content</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">requestCause</tt></td>
+<td>the cause of request processing failure. The class name of the
+cause and the detail message of it will be contained if exists.</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">requestContentPreview</tt></td>
+<td>the preview of the request content</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">responseStartTimeMillis</tt></td>
+<td>the time when the processing of the response started,
+in milliseconds since the epoch</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">responseDurationMillis</tt></td>
+<td>the duration that was taken to consume or produce the response
+completely, in milliseconds</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">responseDurationNanos</tt></td>
+<td>the duration that was taken to consume or produce the response
+completely, in nanoseconds</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">responseLength</tt></td>
+<td>the length of the response content</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">responseCause</tt></td>
+<td>the cause of response processing failure. The class name of the
+cause and the detail message of it will be contained if exists.</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">responseContentPreview</tt></td>
+<td>the preview of the response content</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">totalDurationMillis</tt></td>
+<td>the amount of time taken since the request processing started and
+until the response processing ended, in milliseconds</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">totalDurationNanos</tt></td>
+<td>the amount of time taken since the request processing started and
+until the response processing ended, in nanoseconds</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">sessionProtocol</tt></td>
+<td>the session protocol of the request.
+e.g. <tt class="docutils literal">h1</tt>, <tt class="docutils literal">h2</tt>, <tt class="docutils literal">h1c</tt> or <tt class="docutils literal">h2c</tt></td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">serializationFormat</tt></td>
+<td>the serialization format of the request.
+e.g. <tt class="docutils literal">tbinary</tt>, <tt class="docutils literal">ttext</tt>, <tt class="docutils literal">tcompact</tt>, <tt class="docutils literal">tjson</tt> or <tt class="docutils literal">none</tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">scheme</tt></td>
+<td>the scheme value printed as <tt class="docutils literal">serializationFormat+sessionProtocol</tt></td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">host</tt></td>
+<td>the host name of the request</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">status</tt></td>
+<td>the status code and its reason phrase of the response.
+e.g. <tt class="docutils literal">200 OK</tt></td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">statusCode</tt></td>
+<td>the status code of the response. e.g. <tt class="docutils literal">200</tt></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="customizing-timestamp-format">
+<span id="timestamp-format"></span><h3>Customizing timestamp format<a class="headerlink" href="#customizing-timestamp-format" title="Permalink to this headline">¶</a></h3>
+<p>You can specify a new date/time format for the <tt class="docutils literal">%t</tt> token with <a class="reference external" href="https://docs.oracle.com/javase/10/docs/api/java/time/format/DateTimeFormatter.html">DateTimeFormatter</a>. You can use one of the
+following formatters which is provided by JDK as a variable of the <tt class="docutils literal">%t</tt> token, e.g. <tt class="docutils literal">%{BASIC_ISO_DATE}t</tt>.
+If you want to use your own pattern, you can specify it as the variable, e.g. <tt class="docutils literal">%{yyyy MM dd}t</tt>.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="24%" />
+<col width="33%" />
+<col width="43%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Formatter</th>
+<th class="head">Description</th>
+<th class="head">Example</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><tt class="docutils literal">BASIC_ISO_DATE</tt></td>
+<td>Basic ISO date</td>
+<td><tt class="docutils literal">20111203</tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">ISO_LOCAL_DATE</tt></td>
+<td>ISO Local Date</td>
+<td><tt class="docutils literal">2011-12-03</tt></td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">ISO_OFFSET_DATE</tt></td>
+<td>ISO Date with offset</td>
+<td><tt class="docutils literal">2011-12-03+01:00</tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">ISO_DATE</tt></td>
+<td>ISO Date with or without offset</td>
+<td><tt class="docutils literal">2011-12-03+01:00</tt>; <tt class="docutils literal">2011-12-03</tt></td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">ISO_LOCAL_TIME</tt></td>
+<td>Time without offset</td>
+<td><tt class="docutils literal">10:15:30</tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">ISO_OFFSET_TIME</tt></td>
+<td>Time with offset</td>
+<td><tt class="docutils literal">10:15:30+01:00</tt></td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">ISO_TIME</tt></td>
+<td>Time with or without offset</td>
+<td><tt class="docutils literal">10:15:30+01:00</tt>; <tt class="docutils literal">10:15:30</tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">ISO_LOCAL_DATE_TIME</tt></td>
+<td>ISO Local Date and Time</td>
+<td><tt class="docutils literal">2011-12-03T10:15:30</tt></td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">ISO_OFFSET_DATE_TIME</tt></td>
+<td>Date Time with Offset</td>
+<td><tt class="docutils literal">2011-12-03T10:15:30+01:00</tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">ISO_ZONED_DATE_TIME</tt></td>
+<td>Zoned Date Time</td>
+<td><tt class="docutils literal">2011-12-03T10:15:30+01:00[Europe/Paris]</tt></td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">ISO_DATE_TIME</tt></td>
+<td>Date and time with ZoneId</td>
+<td><tt class="docutils literal">2011-12-03T10:15:30+01:00[Europe/Paris]</tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">ISO_ORDINAL_DATE</tt></td>
+<td>Year and day of year</td>
+<td><tt class="docutils literal">2012-337</tt></td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">ISO_WEEK_DATE</tt></td>
+<td>Year and Week</td>
+<td><tt class="docutils literal">2012-W48-6</tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal">ISO_INSTANT</tt></td>
+<td>Date and Time of an Instant</td>
+<td><tt class="docutils literal">2011-12-03T10:15:30Z</tt></td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal">RFC_1123_DATE_TIME</tt></td>
+<td>RFC 1123 / RFC 822</td>
+<td><tt class="docutils literal">Tue, 3 Jun 2008 11:05:30 GMT</tt></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="customizing-an-access-log-writer">
+<h2>Customizing an access log writer<a class="headerlink" href="#customizing-an-access-log-writer" title="Permalink to this headline">¶</a></h2>
+<p>You can specify your own log writer which implements a <tt class="docutils literal">Consumer</tt> of <code class="code api-reference docutils literal javadoc"><a class="code api-reference reference external javadoc" href="apidocs/com/linecorp/armeria/common/logging/RequestLog.html">RequestLog</a></code>.</p>
+<div class="highlight-java notranslate"><div class="highlight hljs"><pre class="java">ServerBuilder sb = new ServerBuilder();
+sb.accessLogWriter(requestLog -&gt; {
+    // Write your access log with the given RequestLog instance.
+    ....
+}, true);</pre></div>
+</div>
+</div>
+<div class="section" id="customizing-an-access-logger">
+<h2>Customizing an access logger<a class="headerlink" href="#customizing-an-access-logger" title="Permalink to this headline">¶</a></h2>
+<p>Armeria uses an SLF4J logger whose name is based on a reversed domain name of each virtual host by
+default, e.g.</p>
+<ul class="simple">
+<li><tt class="docutils literal">com.linecorp.armeria.logging.access.com.example</tt> for <tt class="docutils literal">*.example.com</tt></li>
+<li><tt class="docutils literal">com.linecorp.armeria.logging.access.com.linecorp</tt> for <tt class="docutils literal">*.linecorp.com</tt></li>
+</ul>
+<p>Alternatively, you can specify your own mapper or logger for a <code class="code api-reference docutils literal javadoc"><a class="code api-reference reference external javadoc" href="apidocs/com/linecorp/armeria/server/VirtualHost.html">VirtualHost</a></code>, e.g.</p>
+<div class="highlight-java notranslate"><div class="highlight hljs"><pre class="java">ServerBuilder sb = new ServerBuilder();
+
+// Using the specific logger name.
+sb.accessLogger(&quot;com.example.my.access.logs&quot;);
+....
+
+// Using your own logger.
+Logger logger = LoggerFactory.getLogger(&quot;com.example2.my.access.logs&quot;);
+sb.accessLogger(Logger);
+....
+
+// Using the mapper which sets an access logger with the given VirtualHost instance.
+sb.accessLogger(virtualHost -&gt; {
+    // Return the logger.
+    // Do not return null. Otherwise, it will raise an IllegalStateException.
+    return LoggerFactory.getLogger(&quot;com.example.my.access.logs.&quot; + virtualHost.defaultHostname());
+});
+....</pre></div>
+</div>
+<p>You can also specify your own logger for the specific <code class="code api-reference docutils literal javadoc"><a class="code api-reference reference external javadoc" href="apidocs/com/linecorp/armeria/server/VirtualHost.html">VirtualHost</a></code>.
+In this case, the mapper or logger you set for a specific <code class="code api-reference docutils literal javadoc"><a class="code api-reference reference external javadoc" href="apidocs/com/linecorp/armeria/server/VirtualHost.html">VirtualHost</a></code> will override the access logger set via <tt class="docutils literal">ServerBuilder.accessLogger()</tt>.</p>
+<div class="highlight-java notranslate"><div class="highlight hljs"><pre class="java">// Using the specific logger name.
+sb.withVirtualHost(&quot;*.example.com&quot;)
+  .accessLogger(&quot;com.example.my.access.logs&quot;)
+  .and()
+....
+
+// Using your own logger.
+Logger logger = LoggerFactory.getLogger(&quot;com.example2.my.access.logs&quot;);
+sb.withVirtualHost(&quot;*.example2.com&quot;)
+  .accessLogger(Logger)
+  .and()
+....
+
+// Using the mapper which sets an access logger with the given VirtualHost instance.
+sb.withVirtualHost(&quot;*.example3.com&quot;)
+  .accessLogger(virtualHost -&gt; {
+    // Return the logger.
+    // Do not return null. Otherwise, it will raise an IllegalStateException.
+    return LoggerFactory.getLogger(&quot;com.example.my.access.logs.&quot; + virtualHost.defaultHostname());
+  })
+....</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="server-cors.html" class="btn btn-neutral float-right" title="Configuring CORS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="server-servlet.html" class="btn btn-neutral" title="Embedding a servlet container" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015-2019, LINE Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+  <div class="github-fork-ribbon-wrapper right">
+    <div class="github-fork-ribbon">
+      <a href="https://github.com/line/armeria">Fork me at GitHub</a>
+    </div>
+  </div>
+  <script type="text/javascript" src="_static/add_badges.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/gradle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/protobuf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/thrift.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/yaml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.6.0/highlightjs-line-numbers.min.js"></script>
+  <script>
+    document.querySelectorAll('div.hljs > pre').forEach(function(block) {
+      hljs.highlightBlock(block);
+      hljs.lineNumbersBlock(block);
+    });
+  </script>
+   
+
+
+</body>
+</html>
